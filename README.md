@@ -25,9 +25,10 @@ import AssKit
 ## Build XCFrameworks
 
 ```bash
-make build
-make build platform=ios
-make build platform=ios,macos,tvos
+./build.sh
+./build.sh platform=ios
+./build.sh platform=ios,macos,tvos
+./build.sh clean
 ```
 
 The build script uses this dependency set:
