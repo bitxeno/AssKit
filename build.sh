@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 #
 # AssKit: local libass XCFramework builder for Apple platforms.
 #
@@ -16,7 +16,7 @@ FRIBIDI_VERSION="v1.0.16"
 HARFBUZZ_VERSION="14.2.0"
 LIBASS_VERSION="0.17.4"
 
-SCRIPT_DIR="${0:a:h}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${SCRIPT_DIR}/build"
 OUTPUT_DIR="${SCRIPT_DIR}/Vendor"
 SRC_DIR="${BUILD_DIR}/src"
@@ -40,7 +40,7 @@ selected_platforms=()
 for arg in "$@"; do
     case "$arg" in
         platform=*)
-            selected_platforms=(${(s:,:)${arg#platform=}})
+            IFS=',' read -r -a selected_platforms <<< "${arg#platform=}"
             ;;
     esac
 done
@@ -63,47 +63,47 @@ keys_to_build() {
     need_platform tvos && keys+=(tvos-arm64)
     need_platform tvsimulator && keys+=(tvsimulator-arm64 tvsimulator-x86_64)
     need_platform macos && keys+=(macos-arm64 macos-x86_64)
-    print -r -- "${keys[@]}"
+    printf '%s\n' "${keys[@]}"
 }
 
 sdk_for_key() {
     case "$1" in
-        ios-*) print -r -- "iphoneos" ;;
-        isimulator-*) print -r -- "iphonesimulator" ;;
-        tvos-*) print -r -- "appletvos" ;;
-        tvsimulator-*) print -r -- "appletvsimulator" ;;
-        macos-*) print -r -- "macosx" ;;
+        ios-*) printf '%s\n' "iphoneos" ;;
+        isimulator-*) printf '%s\n' "iphonesimulator" ;;
+        tvos-*) printf '%s\n' "appletvos" ;;
+        tvsimulator-*) printf '%s\n' "appletvsimulator" ;;
+        macos-*) printf '%s\n' "macosx" ;;
     esac
 }
 
 arch_for_key() {
-    print -r -- "${1##*-}"
+    printf '%s\n' "${1##*-}"
 }
 
 target_for_key() {
     case "$1" in
-        ios-arm64) print -r -- "arm64-apple-ios14.0" ;;
-        isimulator-arm64) print -r -- "arm64-apple-ios14.0-simulator" ;;
-        isimulator-x86_64) print -r -- "x86_64-apple-ios14.0-simulator" ;;
-        tvos-arm64) print -r -- "arm64-apple-tvos14.0" ;;
-        tvsimulator-arm64) print -r -- "arm64-apple-tvos14.0-simulator" ;;
-        tvsimulator-x86_64) print -r -- "x86_64-apple-tvos14.0-simulator" ;;
-        macos-arm64) print -r -- "arm64-apple-macos11.0" ;;
-        macos-x86_64) print -r -- "x86_64-apple-macos11.0" ;;
+        ios-arm64) printf '%s\n' "arm64-apple-ios14.0" ;;
+        isimulator-arm64) printf '%s\n' "arm64-apple-ios14.0-simulator" ;;
+        isimulator-x86_64) printf '%s\n' "x86_64-apple-ios14.0-simulator" ;;
+        tvos-arm64) printf '%s\n' "arm64-apple-tvos14.0" ;;
+        tvsimulator-arm64) printf '%s\n' "arm64-apple-tvos14.0-simulator" ;;
+        tvsimulator-x86_64) printf '%s\n' "x86_64-apple-tvos14.0-simulator" ;;
+        macos-arm64) printf '%s\n' "arm64-apple-macos11.0" ;;
+        macos-x86_64) printf '%s\n' "x86_64-apple-macos11.0" ;;
     esac
 }
 
 host_for_key() {
     case "$(arch_for_key "$1")" in
-        arm64) print -r -- "aarch64-apple-darwin" ;;
-        x86_64) print -r -- "x86_64-apple-darwin" ;;
+        arm64) printf '%s\n' "aarch64-apple-darwin" ;;
+        x86_64) printf '%s\n' "x86_64-apple-darwin" ;;
     esac
 }
 
 cpu_family_for_arch() {
     case "$1" in
-        arm64) print -r -- "aarch64" ;;
-        x86_64) print -r -- "x86_64" ;;
+        arm64) printf '%s\n' "aarch64" ;;
+        x86_64) printf '%s\n' "x86_64" ;;
     esac
 }
 
@@ -183,7 +183,7 @@ EOF
 
 dep_pkg_config_path() {
     local key="$1"
-    print -r -- "${THIN_DIR}/libunibreak/${key}/lib/pkgconfig:${THIN_DIR}/freetype/${key}/lib/pkgconfig:${THIN_DIR}/fribidi/${key}/lib/pkgconfig:${THIN_DIR}/harfbuzz/${key}/lib/pkgconfig"
+    printf '%s\n' "${THIN_DIR}/libunibreak/${key}/lib/pkgconfig:${THIN_DIR}/freetype/${key}/lib/pkgconfig:${THIN_DIR}/fribidi/${key}/lib/pkgconfig:${THIN_DIR}/harfbuzz/${key}/lib/pkgconfig"
 }
 
 run_make() {
@@ -269,10 +269,56 @@ build_key() {
 
 framework_min_os() {
     case "$1" in
-        ios|isimulator) print -r -- "14.0" ;;
-        tvos|tvsimulator) print -r -- "14.0" ;;
-        macos) print -r -- "11.0" ;;
+        ios|isimulator) printf '%s\n' "14.0" ;;
+        tvos|tvsimulator) printf '%s\n' "14.0" ;;
+        macos) printf '%s\n' "11.0" ;;
     esac
+}
+
+create_versioned_bundle() {
+    local framework="$1"
+    local platform="$2"
+    local framework_dir="$3"
+
+    [[ "$platform" == "macos" ]] || return 0
+
+    local info_plist_path="${framework_dir}/Info.plist"
+    local versions_path="${framework_dir}/Versions"
+
+    if [[ -d "${framework_dir}" && -f "${info_plist_path}" && ! -d "${versions_path}" ]]; then
+        echo "Converting ${framework}.framework to versioned bundle structure..."
+
+        local version_a_resources_path="${framework_dir}/Versions/A/Resources"
+        mkdir -p "${version_a_resources_path}"
+
+        local new_info_plist_path="${version_a_resources_path}/Info.plist"
+        mv "${info_plist_path}" "${new_info_plist_path}"
+
+        local binary_path="${framework_dir}/${framework}"
+        local new_binary_path="${framework_dir}/Versions/A/${framework}"
+        if [[ -e "${binary_path}" ]]; then
+            mv "${binary_path}" "${new_binary_path}"
+        fi
+
+        local license_path="${framework_dir}/LICENSE"
+        if [[ -e "${license_path}" ]]; then
+            mv "${license_path}" "${framework_dir}/Versions/A/LICENSE"
+        fi
+
+        local current_link_path="${framework_dir}/Versions/Current"
+        rm -f "${current_link_path}"
+        ln -s A "${current_link_path}"
+
+        local binary_link_path="${framework_dir}/${framework}"
+        rm -f "${binary_link_path}"
+        ln -s "Versions/Current/${framework}" "${binary_link_path}"
+
+        local resources_link_path="${framework_dir}/Resources"
+        rm -rf "${resources_link_path}"
+        ln -s "Versions/Current/Resources" "${resources_link_path}"
+
+        echo "${framework}.framework converted to versioned bundle structure."
+    fi
 }
 
 make_framework() {
@@ -288,7 +334,7 @@ make_framework() {
     rm -rf "${fw_dir}"
     mkdir -p "${fw_dir}/Headers" "${fw_dir}/Modules"
 
-    local first_key="${keys[1]}"
+    local first_key="${keys[0]}"
     cp -R "${THIN_DIR}/${name}/${first_key}/${header_root}/." "${fw_dir}/Headers/"
 
     local inputs=()
@@ -318,6 +364,8 @@ EOF
 <key>MinimumOSVersion</key><string>${min_os}</string>
 </dict></plist>
 EOF
+
+    create_versioned_bundle "$framework" "$platform" "$fw_dir"
 }
 
 create_xcframework() {
