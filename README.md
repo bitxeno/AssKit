@@ -19,34 +19,31 @@ import AssKit
 
 `Package.swift` uses local binary targets under `Vendor/*.xcframework`. No remote binary target is referenced by the package.
 
-## Build XCFrameworks
 
-```bash
-./build.sh
-./build.sh platform=ios
-./build.sh platform=ios,macos,tvos
-./build.sh clean
+## SwiftUI Overlay
+
+```swift
+VideoPlayer(player: player)
+    .overlay {
+        AssSubtitleOverlay(subtitleData: assFileData, time: playerTime.seconds)
+            .allowsHitTesting(false)
+    }
 ```
 
-The build script uses this dependency set:
+For production playback, drive `time` from a display link or player time observer. A 60 fps loop is fine because unchanged frames return without re-rendering or copying subtitle pixels.
 
-- libunibreak `libunibreak_6_1`
-- freetype `VER-2-14-3`
-- fribidi `v1.0.16`
-- harfbuzz `14.2.0`
-- libass `0.17.4`
+## UIKit Overlay
 
-libass is built with CoreText enabled and fontconfig/directwrite disabled, which is the right shape for iOS/tvOS/macOS app embedding.
+```swift
+let subtitleView = try AssSubtitleOverlayView()
+try subtitleView.loadASS(assFileData)
+playerContainer.addSubview(subtitleView)
 
-The generated XCFrameworks are written back into:
-
-```text
-Vendor/Libunibreak.xcframework
-Vendor/Libfreetype.xcframework
-Vendor/Libfribidi.xcframework
-Vendor/Libharfbuzz.xcframework
-Vendor/Libass.xcframework
+// Keep it pinned over the player, then call from your display link.
+try subtitleView.render(at: playerTime.seconds)
 ```
+
+`AssSubtitleOverlayView` keeps a reusable pixel surface. When libass reports no visual change, it does no pixel work. When the frame changes, it applies only the returned dirty patch into the surface.
 
 ## Rendering API
 
@@ -102,30 +99,34 @@ The public contract is intentionally small:
 - `AssRenderOutput`: `.unchanged` or `.changed(AssBitmapPatch)`
 - `AssBitmapPatch`: dirty rect and premultiplied BGRA8 bytes
 
-## UIKit Overlay
+## Build XCFrameworks
 
-```swift
-let subtitleView = try AssSubtitleOverlayView()
-try subtitleView.loadASS(assFileData)
-playerContainer.addSubview(subtitleView)
-
-// Keep it pinned over the player, then call from your display link.
-try subtitleView.render(at: playerTime.seconds)
+```bash
+./build.sh
+./build.sh platform=ios
+./build.sh platform=ios,macos,tvos
+./build.sh clean
 ```
 
-`AssSubtitleOverlayView` keeps a reusable pixel surface. When libass reports no visual change, it does no pixel work. When the frame changes, it applies only the returned dirty patch into the surface.
+The build script uses this dependency set:
 
-## SwiftUI Overlay
+- libunibreak `libunibreak_6_1`
+- freetype `VER-2-14-3`
+- fribidi `v1.0.16`
+- harfbuzz `14.2.0`
+- libass `0.17.4`
 
-```swift
-VideoPlayer(player: player)
-    .overlay {
-        AssSubtitleOverlay(subtitleData: assFileData, time: playerTime.seconds)
-            .allowsHitTesting(false)
-    }
+libass is built with CoreText enabled and fontconfig/directwrite disabled, which is the right shape for iOS/tvOS/macOS app embedding.
+
+The generated XCFrameworks are written back into:
+
+```text
+Vendor/Libunibreak.xcframework
+Vendor/Libfreetype.xcframework
+Vendor/Libfribidi.xcframework
+Vendor/Libharfbuzz.xcframework
+Vendor/Libass.xcframework
 ```
-
-For production playback, drive `time` from a display link or player time observer. A 60 fps loop is fine because unchanged frames return without re-rendering or copying subtitle pixels.
 
 ## Performance Notes
 
