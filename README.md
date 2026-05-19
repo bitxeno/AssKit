@@ -1,16 +1,13 @@
 # AssKit
 
-AssKit is a Swift Package for rendering ASS/SSA subtitles on Apple platforms with libass. It follows the package shape used by FFmpegBuild: local binary XCFramework targets for libass and its dependencies, plus a small Swift API that app code can use directly.
+AssKit is a Swift Package for rendering ASS/SSA subtitles on Apple platforms with [libass](https://github.com/libass/libass).
 
 ## Features
 
-- SPM product: `AssKit`
 - C bridge over libass for stable Swift interop
-- Incremental rendering API: unchanged subtitle frames return `.unchanged`
 - Dirty-rect BGRA patches for changed subtitle pixels
 - UIKit overlay view for player overlays
 - SwiftUI wrapper for UIKit-based overlays
-- Build scripts for libass, libunibreak, freetype, fribidi, and harfbuzz XCFrameworks
 
 ## Installation
 
