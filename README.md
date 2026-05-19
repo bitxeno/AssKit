@@ -20,7 +20,7 @@ Add this repository as a Swift Package dependency, then import:
 import AssKit
 ```
 
-`Package.swift` uses local binary targets under `Sources/*.xcframework`, matching the style of FFmpegBuild. No remote binary target is referenced by the package.
+`Package.swift` uses local binary targets under `Vendor/*.xcframework`. No remote binary target is referenced by the package.
 
 ## Build XCFrameworks
 
@@ -43,11 +43,11 @@ libass is built with CoreText enabled and fontconfig/directwrite disabled, which
 The generated XCFrameworks are written back into:
 
 ```text
-Sources/Libunibreak.xcframework
-Sources/Libfreetype.xcframework
-Sources/Libfribidi.xcframework
-Sources/Libharfbuzz.xcframework
-Sources/Libass.xcframework
+Vendor/Libunibreak.xcframework
+Vendor/Libfreetype.xcframework
+Vendor/Libfribidi.xcframework
+Vendor/Libharfbuzz.xcframework
+Vendor/Libass.xcframework
 ```
 
 ## Rendering API

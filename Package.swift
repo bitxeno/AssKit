@@ -39,11 +39,11 @@ let package = Package(
                 .headerSearchPath("libass-headers"),
             ]
         ),
-        .binaryTarget(name: "Libunibreak", path: "Sources/Libunibreak.xcframework"),
-        .binaryTarget(name: "Libfreetype", path: "Sources/Libfreetype.xcframework"),
-        .binaryTarget(name: "Libfribidi", path: "Sources/Libfribidi.xcframework"),
-        .binaryTarget(name: "Libharfbuzz", path: "Sources/Libharfbuzz.xcframework"),
-        .binaryTarget(name: "Libass", path: "Sources/Libass.xcframework"),
+        .binaryTarget(name: "Libunibreak", path: "Vendor/Libunibreak.xcframework"),
+        .binaryTarget(name: "Libfreetype", path: "Vendor/Libfreetype.xcframework"),
+        .binaryTarget(name: "Libfribidi", path: "Vendor/Libfribidi.xcframework"),
+        .binaryTarget(name: "Libharfbuzz", path: "Vendor/Libharfbuzz.xcframework"),
+        .binaryTarget(name: "Libass", path: "Vendor/Libass.xcframework"),
         .testTarget(
             name: "AssKitTests",
             dependencies: ["AssKit"],

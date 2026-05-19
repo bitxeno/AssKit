@@ -18,7 +18,7 @@ LIBASS_VERSION="0.17.4"
 
 SCRIPT_DIR="${0:a:h}"
 BUILD_DIR="${SCRIPT_DIR}/build"
-OUTPUT_DIR="${SCRIPT_DIR}/Sources"
+OUTPUT_DIR="${SCRIPT_DIR}/Vendor"
 SRC_DIR="${BUILD_DIR}/src"
 THIN_DIR="${BUILD_DIR}/thin"
 WORK_DIR="${BUILD_DIR}/work"
@@ -361,6 +361,7 @@ create_xcframework() {
 }
 
 make_xcframeworks() {
+    mkdir -p "${OUTPUT_DIR}"
     rm -rf "${FRAMEWORK_DIR}"
     create_xcframework libunibreak Libunibreak libunibreak.a include
     create_xcframework freetype Libfreetype libfreetype.a include/freetype2
