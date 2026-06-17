@@ -17,12 +17,20 @@ public protocol AssRendering: AnyObject {
 
 `AssRenderer` is the default libass implementation.
 
+Font lookup can be customized through `AssRendererConfiguration` during initialization,
+or later with `AssRenderer.setFontsDirectory(_:)` and `AssRenderer.configureFonts(_:)`.
+
 ## FFmpeg Embedded ASS
 
 Use this path for ASS/SSA subtitles embedded in containers and decoded by FFmpeg.
 
 ```swift
-let renderer = try AssRenderer()
+let renderer = try AssRenderer(
+    configuration: AssRendererConfiguration(
+        defaultFontFamily: "Helvetica",
+        fontsDirectoryPath: customFontsDirectory.path
+    )
+)
 
 try renderer.loadTrack(
     .track(codecPrivateData)
@@ -45,6 +53,12 @@ For long-running playback, prune old events after they are no longer needed:
 
 ```swift
 try renderer.pruneEvents(before: playbackTime - 30)
+```
+
+If you need to update the extra font search path later:
+
+```swift
+renderer.setFontsDirectory(customFontsDirectory.path)
 ```
 
 The chunk format is libass/Matroska ASS event format: `ReadOrder, Layer, Style, Name, MarginL, MarginR, MarginV, Effect, Text`. FFmpeg's ASS decoded text normally matches this shape.

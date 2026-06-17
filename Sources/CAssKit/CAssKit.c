@@ -128,6 +128,13 @@ int32_t asskit_renderer_set_frame_size(AssKitRendererRef *renderer, int32_t widt
     return 0;
 }
 
+void asskit_renderer_set_fonts_dir(AssKitRendererRef *renderer, const char *fonts_dir) {
+    if (renderer == NULL) {
+        return;
+    }
+    ass_set_fonts_dir(renderer->library, fonts_dir);
+}
+
 void asskit_renderer_set_fonts(AssKitRendererRef *renderer, const char *default_font, const char *default_family) {
     if (renderer == NULL) {
         return;

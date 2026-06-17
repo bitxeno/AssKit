@@ -48,7 +48,14 @@ try subtitleView.render(at: playerTime.seconds)
 ## Rendering API
 
 ```swift
-let renderer = try AssRenderer()
+let renderer = try AssRenderer(
+    configuration: AssRendererConfiguration(
+        defaultFontFamily: "Helvetica",
+        fontsDirectoryPath: Bundle.main.bundleURL
+            .appendingPathComponent("SubtitleFonts", isDirectory: true)
+            .path
+    )
+)
 try renderer.loadASS(assFileData)
 
 let output = try renderer.render(
@@ -68,11 +75,23 @@ case .changed(let patch):
 }
 ```
 
+If you package extra font files with your app, point `fontsDirectoryPath` at that directory so libass can resolve subtitle font names from your bundled fonts.
+
+You can also update the extra font search path later:
+
+```swift
+renderer.setFontsDirectory(
+    Bundle.main.bundleURL
+        .appendingPathComponent("SubtitleFonts", isDirectory: true)
+        .path
+)
+```
+
 For FFmpeg embedded ASS/SSA streams:
 
 ```swift
 let renderer = try AssRenderer()
-try renderer.loadTrack(.track(codecParametersExtradata))
+try renderer.loadTrack(.track(assHeader))
 
 try renderer.appendEvent(
     .AssRect(

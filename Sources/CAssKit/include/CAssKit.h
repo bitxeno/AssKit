@@ -27,6 +27,7 @@ AssKitRendererRef *asskit_renderer_create(void);
 void asskit_renderer_destroy(AssKitRendererRef *renderer);
 
 int32_t asskit_renderer_set_frame_size(AssKitRendererRef *renderer, int32_t width, int32_t height);
+void asskit_renderer_set_fonts_dir(AssKitRendererRef *renderer, const char *fonts_dir);
 void asskit_renderer_set_fonts(AssKitRendererRef *renderer, const char *default_font, const char *default_family);
 
 int32_t asskit_renderer_load_ass(AssKitRendererRef *renderer, const uint8_t *data, size_t count);

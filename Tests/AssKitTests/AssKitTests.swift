@@ -65,6 +65,38 @@ final class AssKitTests: XCTestCase {
         XCTAssertNotNil(output.patch)
     }
 
+    func testRendererAcceptsCustomFontsDirectoryConfiguration() throws {
+        let fontsDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: fontsDirectory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: fontsDirectory) }
+
+        let ass = """
+        [Script Info]
+        ScriptType: v4.00+
+        PlayResX: 320
+        PlayResY: 180
+
+        [V4+ Styles]
+        Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+        Style: Default,Helvetica,28,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,2,0,2,20,20,20,1
+
+        [Events]
+        Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+        Dialogue: 0,0:00:00.00,0:00:02.00,Default,,0,0,0,,AssKit
+        """
+
+        let renderer = try AssRenderer(
+            configuration: AssRendererConfiguration(fontsDirectoryPath: fontsDirectory.path)
+        )
+        try renderer.loadASS(Data(ass.utf8))
+
+        let output = try renderer.render(
+            AssRenderRequest(time: 0.5, viewportSize: CGSize(width: 320, height: 180), scale: 1)
+        )
+        XCTAssertNotNil(output.patch)
+    }
+
     func testPatchSurfaceAcceptsEmptyPatch() {
         let surface = AssPixelSurface()
         surface.reset(pixelWidth: 16, pixelHeight: 16)

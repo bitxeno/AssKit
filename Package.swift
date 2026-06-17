@@ -25,7 +25,7 @@ let package = Package(
             ],
             path: "Sources/AssKit",
             linkerSettings: [
-                .linkedFramework("CoreText", .when(platforms: [.iOS, .tvOS, .macOS])),
+                .linkedFramework("CoreText"),
                 .linkedLibrary("z"),
                 .linkedLibrary("iconv"),
             ]

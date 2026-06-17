@@ -4,6 +4,7 @@ import Foundation
 
 public final class AssRenderer: AssRendering {
     private let handle: OpaquePointer
+    private var configuration: AssRendererConfiguration
     private var framePixelSize: CGSize = .zero
 
     public init(configuration: AssRendererConfiguration = AssRendererConfiguration()) throws {
@@ -11,7 +12,8 @@ public final class AssRenderer: AssRendering {
             throw AssKitError.rendererCreationFailed
         }
         self.handle = handle
-        setFonts(configuration)
+        self.configuration = configuration
+        applyConfiguration()
     }
 
     deinit {
@@ -84,6 +86,16 @@ public final class AssRenderer: AssRendering {
         }
     }
 
+    public func setFontsDirectory(_ path: String?) {
+        configuration.fontsDirectoryPath = path
+        applyConfiguration()
+    }
+
+    public func configureFonts(_ configuration: AssRendererConfiguration) {
+        self.configuration = configuration
+        applyConfiguration()
+    }
+
     public func render(_ request: AssRenderRequest) throws -> AssRenderOutput {
         try updateFrameSizeIfNeeded(request)
 
@@ -126,7 +138,11 @@ public final class AssRenderer: AssRendering {
         return .changed(patch)
     }
 
-    private func setFonts(_ configuration: AssRendererConfiguration) {
+    private func applyConfiguration() {
+        configuration.fontsDirectoryPath.withCStringOrNil { fontsDirectory in
+            asskit_renderer_set_fonts_dir(handle, fontsDirectory)
+        }
+
         configuration.defaultFontPath.withCStringOrNil { fontPath in
             configuration.defaultFontFamily.withCString { family in
                 asskit_renderer_set_fonts(handle, fontPath, family)

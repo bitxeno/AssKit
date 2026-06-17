@@ -11,10 +11,16 @@ public enum AssKitError: Error, Sendable {
 public struct AssRendererConfiguration: Sendable {
     public var defaultFontPath: String?
     public var defaultFontFamily: String
+    public var fontsDirectoryPath: String?
 
-    public init(defaultFontPath: String? = nil, defaultFontFamily: String = "Helvetica") {
+    public init(
+        defaultFontPath: String? = nil,
+        defaultFontFamily: String = "Helvetica",
+        fontsDirectoryPath: String? = nil
+    ) {
         self.defaultFontPath = defaultFontPath
         self.defaultFontFamily = defaultFontFamily
+        self.fontsDirectoryPath = fontsDirectoryPath
     }
 }
 
