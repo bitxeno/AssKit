@@ -65,7 +65,7 @@ jobs:
             echo "No changes to commit"
             CHANGED=false
           else
-            git commit -m "chore: update Sources after build for v${VERSION}"
+            git commit -m "chore: release version v${VERSION}"
             CHANGED=true
           fi
           echo "CHANGED=$CHANGED" >> $GITHUB_ENV
