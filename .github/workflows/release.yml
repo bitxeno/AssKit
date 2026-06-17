@@ -56,11 +56,11 @@ jobs:
           chmod +x ./build.sh || true
           ./build.sh
 
-      - name: Commit updated Sources
+      - name: Commit updated Vendor
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Sources || true
+          git add Vendor || true
           if git diff --cached --quiet; then
             echo "No changes to commit"
             CHANGED=false
