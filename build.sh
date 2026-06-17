@@ -321,6 +321,38 @@ create_versioned_bundle() {
     fi
 }
 
+copy_framework_license() {
+    local framework="$1"
+    local framework_dir="$2"
+    local license_source=""
+
+    case "$framework" in
+        Libunibreak)
+            license_source="${SRC_DIR}/libunibreak/LICENCE"
+            ;;
+        Libfreetype)
+            license_source="${SRC_DIR}/freetype/LICENSE.TXT"
+            ;;
+        Libfribidi)
+            license_source="${SRC_DIR}/fribidi/COPYING"
+            ;;
+        Libharfbuzz)
+            license_source="${SRC_DIR}/harfbuzz/COPYING"
+            ;;
+        Libass)
+            license_source="${SRC_DIR}/libass/COPYING"
+            ;;
+    esac
+
+    if [[ -n "${license_source}" ]]; then
+        [[ -f "${license_source}" ]] || {
+            echo "Missing license source for ${framework}: ${license_source}" >&2
+            exit 1
+        }
+        cp "${license_source}" "${framework_dir}/LICENSE"
+    fi
+}
+
 make_framework() {
     local name="$1"
     local framework="$2"
@@ -365,6 +397,7 @@ EOF
 </dict></plist>
 EOF
 
+    copy_framework_license "$framework" "$fw_dir"
     create_versioned_bundle "$framework" "$platform" "$fw_dir"
 }
 
@@ -425,6 +458,7 @@ if [[ "$1" == "clean" ]]; then
 fi
 
 if [[ "$1" == "package" ]]; then
+    fetch_sources
     make_xcframeworks
     exit 0
 fi

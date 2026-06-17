@@ -31,7 +31,7 @@ public final class AssRenderer: AssRendering {
         }
     }
 
-    public func loadEmbeddedTrack(_ track: AssEmbeddedTrack) throws {
+    public func loadTrack(_ track: AssTrack) throws {
         let status = track.header.withUnsafeBytes { rawBuffer in
             asskit_renderer_load_codec_private(
                 handle,
@@ -45,7 +45,7 @@ public final class AssRenderer: AssRendering {
         }
     }
 
-    public func appendEmbeddedEvent(_ event: AssEmbeddedEvent) throws {
+    public func appendEvent(_ event: AssEvent) throws {
         let startMS = Int64((event.startTime * 1000).rounded())
         let durationMS = Int64((event.duration * 1000).rounded())
         let status = event.payload.withUnsafeBytes { rawBuffer in
@@ -62,8 +62,8 @@ public final class AssRenderer: AssRendering {
         }
     }
 
-    public func appendEmbeddedEvent(_ text: String, startTime: TimeInterval, duration: TimeInterval) throws {
-        try appendEmbeddedEvent(AssEmbeddedEvent(text: text, startTime: startTime, duration: duration))
+    public func appendEvent(_ text: String, startTime: TimeInterval, duration: TimeInterval) throws {
+        try appendEvent(AssEvent(text: text, startTime: startTime, duration: duration))
     }
 
     public func pruneEvents(before time: TimeInterval) throws {
@@ -73,20 +73,8 @@ public final class AssRenderer: AssRendering {
         }
     }
 
-    public func loadFFmpegASSCodecPrivate(_ data: Data, checkReadOrder: Bool = true) throws {
-        try loadEmbeddedTrack(.ffmpegCodecPrivate(data, usesReadOrder: checkReadOrder))
-    }
-
-    public func appendFFmpegASSSubtitleEvent(_ event: AssEmbeddedEvent) throws {
-        try appendEmbeddedEvent(event)
-    }
-
-    public func appendFFmpegASSSubtitleEvent(_ text: String, startTime: TimeInterval, duration: TimeInterval) throws {
-        try appendEmbeddedEvent(.ffmpegASSRect(text, startTime: startTime, duration: duration))
-    }
-
-    public func pruneFFmpegSubtitleEvents(before time: TimeInterval) throws {
-        try pruneEvents(before: time)
+    public func loadTrack(_ header: Data, checkReadOrder: Bool = true) throws {
+        try loadTrack(.track(header, usesReadOrder: checkReadOrder))
     }
 
     public func flush() throws {

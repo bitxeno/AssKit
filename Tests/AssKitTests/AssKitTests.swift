@@ -50,9 +50,9 @@ final class AssKitTests: XCTestCase {
         """
 
         let renderer = try AssRenderer()
-        try renderer.loadEmbeddedTrack(.ffmpegCodecPrivate(Data(codecPrivate.utf8)))
-        try renderer.appendEmbeddedEvent(
-            .ffmpegASSRect(
+        try renderer.loadTrack(.track(Data(codecPrivate.utf8)))
+        try renderer.appendEvent(
+            .AssRect(
                 "0,0,Default,,0,0,0,,Embedded AssKit",
                 startTime: 0.25,
                 duration: 1.5

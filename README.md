@@ -72,10 +72,10 @@ For FFmpeg embedded ASS/SSA streams:
 
 ```swift
 let renderer = try AssRenderer()
-try renderer.loadEmbeddedTrack(.ffmpegCodecPrivate(codecParametersExtradata))
+try renderer.loadTrack(.track(codecParametersExtradata))
 
-try renderer.appendEmbeddedEvent(
-    .ffmpegASSRect(
+try renderer.appendEvent(
+    .AssRect(
         decodedSubtitleEventData,
         startTime: startSeconds,
         duration: durationSeconds
@@ -93,8 +93,8 @@ The public contract is intentionally small:
 
 - `AssRendering`: protocol for renderers
 - `AssRenderer`: libass-backed implementation
-- `AssEmbeddedTrack`: one embedded ASS/SSA subtitle stream header
-- `AssEmbeddedEvent`: one decoded embedded ASS/SSA subtitle event
+- `AssTrack`: one embedded ASS/SSA subtitle stream header
+- `AssEvent`: one decoded embedded ASS/SSA subtitle event
 - `AssRenderRequest`: time, viewport size, display scale
 - `AssRenderOutput`: `.unchanged` or `.changed(AssBitmapPatch)`
 - `AssBitmapPatch`: dirty rect and premultiplied BGRA8 bytes
@@ -141,4 +141,10 @@ For a Metal player, prefer consuming `AssBitmapPatch` directly and uploading the
 
 ## License Notes
 
-This package links to libass and related third-party libraries. Check each dependency's license before shipping binaries in your app. The vendored libass public headers are included only so the C bridge can compile reliably with SPM binary targets.
+AssKit itself is MIT licensed; see [LICENSE](LICENSE).
+
+AssKit redistributes libass, libunibreak, freetype, fribidi, and harfbuzz in source-derived binary form via the vendored XCFrameworks under [Vendor](Vendor).
+
+When you regenerate the vendored frameworks with [build.sh](build.sh), the build script reads each dependency's upstream license text from the fetched source trees under [build/src](build/src) and copies it into each packaged framework as a LICENSE file so the redistributed binary artifacts carry their notices.
+
+Review the obligations for each dependency before shipping binaries in your app or SDK. The vendored libass public headers are included only so the C bridge can compile reliably with SPM binary targets.

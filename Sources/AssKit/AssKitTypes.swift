@@ -30,7 +30,7 @@ public struct AssRenderRequest: Sendable {
     }
 }
 
-public struct AssEmbeddedTrack: Sendable {
+public struct AssTrack: Sendable {
     public var header: Data
     public var usesReadOrder: Bool
 
@@ -40,7 +40,7 @@ public struct AssEmbeddedTrack: Sendable {
     }
 }
 
-public struct AssEmbeddedEvent: Sendable {
+public struct AssEvent: Sendable {
     public var payload: Data
     public var startTime: TimeInterval
     public var duration: TimeInterval
@@ -56,18 +56,18 @@ public struct AssEmbeddedEvent: Sendable {
     }
 }
 
-public extension AssEmbeddedTrack {
-    static func ffmpegCodecPrivate(_ data: Data, usesReadOrder: Bool = true) -> Self {
-        Self(header: data, usesReadOrder: usesReadOrder)
+public extension AssTrack {
+    static func track(_ header: Data, usesReadOrder: Bool = true) -> Self {
+        Self(header: header, usesReadOrder: usesReadOrder)
     }
 }
 
-public extension AssEmbeddedEvent {
-    static func ffmpegASSRect(_ ass: String, startTime: TimeInterval, duration: TimeInterval) -> Self {
+public extension AssEvent {
+    static func AssRect(_ ass: String, startTime: TimeInterval, duration: TimeInterval) -> Self {
         Self(text: ass, startTime: startTime, duration: duration)
     }
 
-    static func ffmpegASSRect(_ data: Data, startTime: TimeInterval, duration: TimeInterval) -> Self {
+    static func AssRect(_ data: Data, startTime: TimeInterval, duration: TimeInterval) -> Self {
         Self(payload: data, startTime: startTime, duration: duration)
     }
 }
@@ -115,8 +115,8 @@ public enum AssRenderOutput: Sendable {
 
 public protocol AssRendering: AnyObject {
     func loadASS(_ data: Data) throws
-    func loadEmbeddedTrack(_ track: AssEmbeddedTrack) throws
-    func appendEmbeddedEvent(_ event: AssEmbeddedEvent) throws
+    func loadTrack(_ track: AssTrack) throws
+    func appendEvent(_ event: AssEvent) throws
     func pruneEvents(before time: TimeInterval) throws
     func flush() throws
     func render(_ request: AssRenderRequest) throws -> AssRenderOutput

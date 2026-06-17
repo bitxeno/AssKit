@@ -6,6 +6,23 @@
 	<array>
 		<dict>
 			<key>BinaryPath</key>
+			<string>Libunibreak.framework/Libunibreak</string>
+			<key>LibraryIdentifier</key>
+			<string>tvos-arm64_x86_64-simulator</string>
+			<key>LibraryPath</key>
+			<string>Libunibreak.framework</string>
+			<key>SupportedArchitectures</key>
+			<array>
+				<string>arm64</string>
+				<string>x86_64</string>
+			</array>
+			<key>SupportedPlatform</key>
+			<string>tvos</string>
+			<key>SupportedPlatformVariant</key>
+			<string>simulator</string>
+		</dict>
+		<dict>
+			<key>BinaryPath</key>
 			<string>Libunibreak.framework/Versions/A/Libunibreak</string>
 			<key>LibraryIdentifier</key>
 			<string>macos-arm64_x86_64</string>
@@ -37,7 +54,7 @@
 			<key>BinaryPath</key>
 			<string>Libunibreak.framework/Libunibreak</string>
 			<key>LibraryIdentifier</key>
-			<string>tvos-arm64_x86_64-simulator</string>
+			<string>ios-arm64_x86_64-simulator</string>
 			<key>LibraryPath</key>
 			<string>Libunibreak.framework</string>
 			<key>SupportedArchitectures</key>
@@ -46,7 +63,7 @@
 				<string>x86_64</string>
 			</array>
 			<key>SupportedPlatform</key>
-			<string>tvos</string>
+			<string>ios</string>
 			<key>SupportedPlatformVariant</key>
 			<string>simulator</string>
 		</dict>
@@ -63,23 +80,6 @@
 			</array>
 			<key>SupportedPlatform</key>
 			<string>tvos</string>
-		</dict>
-		<dict>
-			<key>BinaryPath</key>
-			<string>Libunibreak.framework/Libunibreak</string>
-			<key>LibraryIdentifier</key>
-			<string>ios-arm64_x86_64-simulator</string>
-			<key>LibraryPath</key>
-			<string>Libunibreak.framework</string>
-			<key>SupportedArchitectures</key>
-			<array>
-				<string>arm64</string>
-				<string>x86_64</string>
-			</array>
-			<key>SupportedPlatform</key>
-			<string>ios</string>
-			<key>SupportedPlatformVariant</key>
-			<string>simulator</string>
 		</dict>
 	</array>
 	<key>CFBundlePackageType</key>

@@ -7,8 +7,8 @@ This document describes the stable Swift-facing API surface.
 ```swift
 public protocol AssRendering: AnyObject {
     func loadASS(_ data: Data) throws
-    func loadEmbeddedTrack(_ track: AssEmbeddedTrack) throws
-    func appendEmbeddedEvent(_ event: AssEmbeddedEvent) throws
+    func loadTrack(_ track: AssTrack) throws
+    func appendEvent(_ event: AssEvent) throws
     func pruneEvents(before time: TimeInterval) throws
     func flush() throws
     func render(_ request: AssRenderRequest) throws -> AssRenderOutput
@@ -24,12 +24,12 @@ Use this path for ASS/SSA subtitles embedded in containers and decoded by FFmpeg
 ```swift
 let renderer = try AssRenderer()
 
-try renderer.loadEmbeddedTrack(
-    .ffmpegCodecPrivate(codecPrivateData)
+try renderer.loadTrack(
+    .track(codecPrivateData)
 )
 
-try renderer.appendEmbeddedEvent(
-    .ffmpegASSRect(
+try renderer.appendEvent(
+    .AssRect(
         eventData,
         startTime: subtitleStartSeconds,
         duration: subtitleDurationSeconds
