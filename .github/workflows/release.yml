@@ -1,4 +1,4 @@
-name: Release on Package Version Change
+name: Release
 
 on:
   push:
