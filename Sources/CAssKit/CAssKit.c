@@ -10,6 +10,8 @@ struct AssKitRendererRef {
     ASS_Library *library;
     ASS_Renderer *renderer;
     ASS_Track *track;
+    char *default_font;
+    char *default_family;
     int32_t width;
     int32_t height;
     int32_t previous_x;
@@ -72,6 +74,23 @@ static void free_current_track(AssKitRendererRef *renderer) {
     }
 }
 
+static void set_string_copy(char **destination, const char *source) {
+    free(*destination);
+    *destination = source != NULL ? strdup(source) : NULL;
+}
+
+static void apply_font_config(AssKitRendererRef *renderer) {
+    ass_set_hinting(renderer->renderer, ASS_HINTING_LIGHT);
+    ass_set_fonts(
+        renderer->renderer,
+        renderer->default_font,
+        renderer->default_family != NULL ? renderer->default_family : "Helvetica",
+        1,
+        NULL,
+        1
+    );
+}
+
 AssKitRendererRef *asskit_renderer_create(void) {
     AssKitRendererRef *ref = (AssKitRendererRef *)calloc(1, sizeof(AssKitRendererRef));
     if (ref == NULL) {
@@ -92,8 +111,7 @@ AssKitRendererRef *asskit_renderer_create(void) {
         return NULL;
     }
 
-    ass_set_hinting(ref->renderer, ASS_HINTING_LIGHT);
-    ass_set_fonts(ref->renderer, NULL, "Helvetica", 1, NULL, 1);
+    apply_font_config(ref);
     return ref;
 }
 
@@ -110,6 +128,8 @@ void asskit_renderer_destroy(AssKitRendererRef *renderer) {
     if (renderer->library != NULL) {
         ass_library_done(renderer->library);
     }
+    free(renderer->default_font);
+    free(renderer->default_family);
     free(renderer);
 }
 
@@ -139,7 +159,49 @@ void asskit_renderer_set_fonts(AssKitRendererRef *renderer, const char *default_
     if (renderer == NULL) {
         return;
     }
-    ass_set_fonts(renderer->renderer, default_font, default_family, 1, NULL, 1);
+    set_string_copy(&renderer->default_font, default_font);
+    set_string_copy(&renderer->default_family, default_family);
+    if (renderer->renderer != NULL) {
+        ass_set_fonts(renderer->renderer, default_font, default_family, 1, NULL, 1);
+    }
+}
+
+int32_t asskit_renderer_add_memory_font(AssKitRendererRef *renderer, const char *name, const uint8_t *data, size_t count) {
+    if (renderer == NULL || renderer->library == NULL || name == NULL || data == NULL || count == 0 || count > INT32_MAX) {
+        return -1;
+    }
+
+    ass_add_font(renderer->library, name, (const char *)data, (int)count);
+    return 0;
+}
+
+int32_t asskit_renderer_clear_fonts(AssKitRendererRef *renderer) {
+    if (renderer == NULL || renderer->library == NULL) {
+        return -1;
+    }
+
+    // ass_clear_fonts is only safe once every ASS_Track and ASS_Renderer
+    // associated with the library has been released, so tear both down first.
+    free_current_track(renderer);
+    if (renderer->renderer != NULL) {
+        ass_renderer_done(renderer->renderer);
+        renderer->renderer = NULL;
+    }
+
+    ass_clear_fonts(renderer->library);
+
+    renderer->renderer = ass_renderer_init(renderer->library);
+    if (renderer->renderer == NULL) {
+        return -2;
+    }
+
+    apply_font_config(renderer);
+    if (renderer->width > 0 && renderer->height > 0) {
+        ass_set_frame_size(renderer->renderer, renderer->width, renderer->height);
+        ass_set_storage_size(renderer->renderer, renderer->width, renderer->height);
+    }
+    reset_dirty_area(renderer);
+    return 0;
 }
 
 int32_t asskit_renderer_load_ass(AssKitRendererRef *renderer, const uint8_t *data, size_t count) {

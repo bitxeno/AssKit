@@ -91,6 +91,55 @@ public final class AssRenderer: AssRendering {
         applyConfiguration()
     }
 
+    /// Adds an in-memory font (for example a font attached to an MKV file)
+    /// into the underlying libass font store.
+    ///
+    /// - Parameters:
+    ///   - name: attachment file name used by libass to match the font family
+    ///     embedded in the subtitle track, e.g. `"SourceHanSansSC-Regular.otf"`.
+    ///   - data: raw binary content of the font attachment.
+    public func addFont(named name: String, data: Data) throws {
+        guard !name.isEmpty else {
+            throw AssKitError.invalidFontData
+        }
+        try addFonts([AssMemoryFont(name: name, data: data)])
+    }
+
+    /// Adds multiple in-memory fonts in one call.
+    ///
+    /// This is convenient when demuxing all font attachments out of a
+    /// Matroska/MKV container before playback starts.
+    public func addFonts(_ fonts: [AssMemoryFont]) throws {
+        guard !fonts.isEmpty else {
+            return
+        }
+
+        for font in fonts {
+            guard !font.name.isEmpty, !font.data.isEmpty,
+                  let baseAddress = font.data.withUnsafeBytes({ $0.bindMemory(to: UInt8.self).baseAddress }) else {
+                throw AssKitError.invalidFontData
+            }
+
+            let status = asskit_renderer_add_memory_font(handle, font.name, baseAddress, font.data.count)
+            guard status == 0 else {
+                throw AssKitError.invalidFontData
+            }
+        }
+    }
+
+    /// Removes all fonts previously added via `addFont`/`addFonts`.
+    ///
+    /// libass requires every associated track and renderer to be released
+    /// before its font store can be cleared, so this call also discards the
+    /// currently loaded subtitle data and frame size. Reload subtitles with
+    /// `loadASS`/`loadTrack` (and re-render once) afterwards.
+    public func clearFonts() throws {
+        let status = asskit_renderer_clear_fonts(handle)
+        guard status == 0 else {
+            throw AssKitError.renderFailed(status)
+        }
+    }
+
     public func configureFonts(_ configuration: AssRendererConfiguration) {
         self.configuration = configuration
         applyConfiguration()
