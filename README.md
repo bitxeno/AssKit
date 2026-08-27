@@ -87,6 +87,34 @@ renderer.setFontsDirectory(
 )
 ```
 
+## Memory Font Injection (MKV Attachments)
+
+MKV files often carry subtitle fonts as attachments. Demux the attachment name and bytes, then inject them into the renderer so libass can resolve embedded font names entirely in memory — no filesystem needed:
+
+```swift
+let renderer = try AssRenderer()
+
+for attachment in container.fontAttachments {
+    try renderer.injectMemoryFont(
+        named: attachment.fileName, // e.g. "SourceHanSansSC-Regular.otf"
+        data: attachment.data
+    )
+}
+
+// Or batch all attachments in one call:
+try renderer.injectMemoryFonts(
+    container.fontAttachments.map { AssMemoryFont(name: $0.fileName, data: $0.data) }
+)
+
+try renderer.loadTrack(.track(assHeader))
+```
+
+Notes:
+
+- `name` should be the original attachment file name, because libass uses it to match the family names declared by the subtitle script.
+- The font bytes are copied by libass during injection; you may release your `Data` buffers afterwards.
+- Injected fonts cannot be selectively removed. Recreate the `AssRenderer` instance to start with a clean font store.
+
 For FFmpeg embedded ASS/SSA streams:
 
 ```swift

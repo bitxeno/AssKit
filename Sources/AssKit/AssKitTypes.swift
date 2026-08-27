@@ -1,10 +1,11 @@
 import CoreGraphics
 import Foundation
 
-public enum AssKitError: Error, Sendable {
+public enum AssKitError: Error, Equatable, Sendable {
     case rendererCreationFailed
     case invalidFrameSize
     case invalidSubtitleData
+    case invalidFontData
     case renderFailed(Int32)
 }
 
@@ -21,6 +22,16 @@ public struct AssRendererConfiguration: Sendable {
         self.defaultFontPath = defaultFontPath
         self.defaultFontFamily = defaultFontFamily
         self.fontsDirectoryPath = fontsDirectoryPath
+    }
+}
+
+public struct AssMemoryFont: Sendable {
+    public var name: String
+    public var data: Data
+
+    public init(name: String, data: Data) {
+        self.name = name
+        self.data = data
     }
 }
 

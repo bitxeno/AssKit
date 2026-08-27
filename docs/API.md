@@ -20,6 +20,10 @@ public protocol AssRendering: AnyObject {
 Font lookup can be customized through `AssRendererConfiguration` during initialization,
 or later with `AssRenderer.setFontsDirectory(_:)` and `AssRenderer.configureFonts(_:)`.
 
+In-memory fonts (such as fonts attached to an MKV file) can be injected with
+`AssRenderer.injectMemoryFont(named:data:)` and `AssRenderer.injectMemoryFonts(_:)`.
+To reset injected fonts, create a new `AssRenderer` instance.
+
 ## FFmpeg Embedded ASS
 
 Use this path for ASS/SSA subtitles embedded in containers and decoded by FFmpeg.
@@ -60,6 +64,38 @@ If you need to update the extra font search path later:
 ```swift
 renderer.setFontsDirectory(customFontsDirectory.path)
 ```
+
+### Memory Font Injection (MKV Attachments)
+
+Matroska/MKV files commonly ship subtitle fonts as attachments. Demux the
+attachment name and bytes, then inject them before rendering so libass can
+resolve embedded font names without touching the filesystem:
+
+```swift
+let renderer = try AssRenderer()
+
+for attachment in container.fontAttachments {
+    try renderer.injectMemoryFont(
+        named: attachment.fileName, // e.g. "SourceHanSansSC-Regular.otf"
+        data: attachment.data
+    )
+}
+
+// Or inject everything in one call:
+try renderer.injectMemoryFonts(
+    container.fontAttachments.map { AssMemoryFont(name: $0.fileName, data: $0.data) }
+)
+
+try renderer.loadTrack(.track(codecPrivateData))
+```
+
+Notes:
+
+- `name` should be the original attachment file name, because libass uses it
+  to match family names declared by the subtitle script.
+- Injected fonts live inside libass' own storage (the data is copied); release
+  `Data` buffers freely afterwards.
+- To clear injected fonts, recreate the renderer instance.
 
 The chunk format is libass/Matroska ASS event format: `ReadOrder, Layer, Style, Name, MarginL, MarginR, MarginV, Effect, Text`. FFmpeg's ASS decoded text normally matches this shape.
 

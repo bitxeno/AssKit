@@ -142,6 +142,15 @@ void asskit_renderer_set_fonts(AssKitRendererRef *renderer, const char *default_
     ass_set_fonts(renderer->renderer, default_font, default_family, 1, NULL, 1);
 }
 
+int32_t asskit_renderer_add_memory_font(AssKitRendererRef *renderer, const char *name, const uint8_t *data, size_t count) {
+    if (renderer == NULL || renderer->library == NULL || name == NULL || data == NULL || count == 0 || count > INT32_MAX) {
+        return -1;
+    }
+
+    ass_add_font(renderer->library, name, (const char *)data, (int)count);
+    return 0;
+}
+
 int32_t asskit_renderer_load_ass(AssKitRendererRef *renderer, const uint8_t *data, size_t count) {
     if (renderer == NULL || data == NULL || count == 0) {
         return -1;
