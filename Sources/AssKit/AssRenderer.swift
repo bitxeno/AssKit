@@ -91,25 +91,25 @@ public final class AssRenderer: AssRendering {
         applyConfiguration()
     }
 
-    /// Injects an in-memory font (for example a font attached to an MKV file)
+    /// Adds an in-memory font (for example a font attached to an MKV file)
     /// into the underlying libass font store.
     ///
     /// - Parameters:
     ///   - name: attachment file name used by libass to match the font family
     ///     embedded in the subtitle track, e.g. `"SourceHanSansSC-Regular.otf"`.
     ///   - data: raw binary content of the font attachment.
-    public func injectMemoryFont(named name: String, data: Data) throws {
+    public func addFont(named name: String, data: Data) throws {
         guard !name.isEmpty else {
             throw AssKitError.invalidFontData
         }
-        try injectMemoryFonts([AssMemoryFont(name: name, data: data)])
+        try addFonts([AssMemoryFont(name: name, data: data)])
     }
 
-    /// Injects multiple in-memory fonts in one call.
+    /// Adds multiple in-memory fonts in one call.
     ///
     /// This is convenient when demuxing all font attachments out of a
     /// Matroska/MKV container before playback starts.
-    public func injectMemoryFonts(_ fonts: [AssMemoryFont]) throws {
+    public func addFonts(_ fonts: [AssMemoryFont]) throws {
         guard !fonts.isEmpty else {
             return
         }
@@ -124,6 +124,19 @@ public final class AssRenderer: AssRendering {
             guard status == 0 else {
                 throw AssKitError.invalidFontData
             }
+        }
+    }
+
+    /// Removes all fonts previously added via `addFont`/`addFonts`.
+    ///
+    /// libass requires every associated track and renderer to be released
+    /// before its font store can be cleared, so this call also discards the
+    /// currently loaded subtitle data and frame size. Reload subtitles with
+    /// `loadASS`/`loadTrack` (and re-render once) afterwards.
+    public func clearFonts() throws {
+        let status = asskit_renderer_clear_fonts(handle)
+        guard status == 0 else {
+            throw AssKitError.renderFailed(status)
         }
     }
 

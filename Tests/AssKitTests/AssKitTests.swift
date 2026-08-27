@@ -117,7 +117,7 @@ final class AssKitTests: XCTestCase {
         """
 
         let renderer = try AssRenderer()
-        try renderer.injectMemoryFont(named: "Helvetica.ttf", data: fontData)
+        try renderer.addFont(named: "Helvetica.ttf", data: fontData)
         try renderer.loadASS(Data(ass.utf8))
 
         let output = try renderer.render(
@@ -135,7 +135,7 @@ final class AssKitTests: XCTestCase {
         let renderer = try AssRenderer(
             configuration: AssRendererConfiguration(defaultFontFamily: "Helvetica")
         )
-        try renderer.injectMemoryFonts([
+        try renderer.addFonts([
             AssMemoryFont(name: "Helvetica-Attachment.ttf", data: fontData),
             AssMemoryFont(name: "Helvetica-Bold-Attachment.ttf", data: fontData),
         ])
@@ -150,12 +150,25 @@ final class AssKitTests: XCTestCase {
     func testRendererRejectsInvalidMemoryFontInjections() throws {
         let renderer = try AssRenderer()
 
-        XCTAssertThrowsError(try renderer.injectMemoryFont(named: "", data: Data([0x01]))) { error in
+        XCTAssertThrowsError(try renderer.addFont(named: "", data: Data([0x01]))) { error in
             XCTAssertEqual(error as? AssKitError, .invalidFontData)
         }
-        XCTAssertThrowsError(try renderer.injectMemoryFont(named: "Empty.ttf", data: Data())) { error in
+        XCTAssertThrowsError(try renderer.addFont(named: "Empty.ttf", data: Data())) { error in
             XCTAssertEqual(error as? AssKitError, .invalidFontData)
         }
+    }
+
+    func testClearFontsResetsStoreAndAllowsReloadingSubtitles() throws {
+        let renderer = try AssRenderer()
+        try renderer.loadASS(Data(assSample.utf8))
+
+        try renderer.clearFonts()
+
+        try renderer.loadASS(Data(assSample.utf8))
+        let output = try renderer.render(
+            AssRenderRequest(time: 0.5, viewportSize: CGSize(width: 320, height: 180), scale: 1)
+        )
+        XCTAssertNotNil(output.patch)
     }
 
     private var assSample: String {

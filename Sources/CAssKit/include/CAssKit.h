@@ -30,6 +30,7 @@ int32_t asskit_renderer_set_frame_size(AssKitRendererRef *renderer, int32_t widt
 void asskit_renderer_set_fonts_dir(AssKitRendererRef *renderer, const char *fonts_dir);
 void asskit_renderer_set_fonts(AssKitRendererRef *renderer, const char *default_font, const char *default_family);
 int32_t asskit_renderer_add_memory_font(AssKitRendererRef *renderer, const char *name, const uint8_t *data, size_t count);
+int32_t asskit_renderer_clear_fonts(AssKitRendererRef *renderer);
 
 int32_t asskit_renderer_load_ass(AssKitRendererRef *renderer, const uint8_t *data, size_t count);
 int32_t asskit_renderer_load_codec_private(AssKitRendererRef *renderer, const uint8_t *data, size_t count, int32_t check_read_order);
