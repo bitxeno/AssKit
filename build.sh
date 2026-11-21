@@ -327,19 +327,19 @@ copy_framework_license() {
     local license_source=""
 
     case "$framework" in
-        Libunibreak)
+        AssKitUnibreak)
             license_source="${SRC_DIR}/libunibreak/LICENCE"
             ;;
-        Libfreetype)
+        AssKitFreetype)
             license_source="${SRC_DIR}/freetype/LICENSE.TXT"
             ;;
-        Libfribidi)
+        AssKitFribidi)
             license_source="${SRC_DIR}/fribidi/COPYING"
             ;;
-        Libharfbuzz)
+        AssKitHarfbuzz)
             license_source="${SRC_DIR}/harfbuzz/COPYING"
             ;;
-        Libass)
+        AssKitLibass)
             license_source="${SRC_DIR}/libass/COPYING"
             ;;
     esac
@@ -444,11 +444,11 @@ create_xcframework() {
 make_xcframeworks() {
     mkdir -p "${OUTPUT_DIR}"
     rm -rf "${FRAMEWORK_DIR}"
-    create_xcframework libunibreak Libunibreak libunibreak.a include
-    create_xcframework freetype Libfreetype libfreetype.a include/freetype2
-    create_xcframework fribidi Libfribidi libfribidi.a include/fribidi
-    create_xcframework harfbuzz Libharfbuzz libharfbuzz.a include/harfbuzz
-    create_xcframework libass Libass libass.a include/ass
+    create_xcframework libunibreak AssKitUnibreak libunibreak.a include
+    create_xcframework freetype AssKitFreetype libfreetype.a include/freetype2
+    create_xcframework fribidi AssKitFribidi libfribidi.a include/fribidi
+    create_xcframework harfbuzz AssKitHarfbuzz libharfbuzz.a include/harfbuzz
+    create_xcframework libass AssKitLibass libass.a include/ass
 }
 
 if [[ "$1" == "clean" ]]; then

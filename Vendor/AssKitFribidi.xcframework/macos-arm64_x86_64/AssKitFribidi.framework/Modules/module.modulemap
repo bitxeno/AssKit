@@ -1,0 +1,4 @@
+framework module AssKitFribidi [system] {
+    umbrella "."
+    export *
+}

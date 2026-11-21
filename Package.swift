@@ -1,7 +1,13 @@
 // swift-tools-version: 5.9
-// package-version: 0.0.2
+// package-version: 0.0.3
 import PackageDescription
 
+// The vendored frameworks ship under an `AssKit` prefix. SwiftPM target names
+// are unique across the whole dependency graph, and other players packaged for
+// Apple platforms (FFmpegKit and forks, KSPlayer, mpv builds, MobileVLCKit)
+// commonly declare targets named Libass or Libfreetype. Sharing those names
+// made this package unresolvable next to any of them. The prefix also keeps
+// the framework bundles distinct inside App.app/Frameworks/.
 let package = Package(
     name: "AssKit",
     platforms: [
@@ -17,11 +23,11 @@ let package = Package(
             name: "AssKit",
             dependencies: [
                 "CAssKit",
-                "Libass",
-                "Libunibreak",
-                "Libfreetype",
-                "Libfribidi",
-                "Libharfbuzz",
+                "AssKitLibass",
+                "AssKitUnibreak",
+                "AssKitFreetype",
+                "AssKitFribidi",
+                "AssKitHarfbuzz",
             ],
             path: "Sources/AssKit",
             linkerSettings: [
@@ -32,18 +38,18 @@ let package = Package(
         ),
         .target(
             name: "CAssKit",
-            dependencies: ["Libass"],
+            dependencies: ["AssKitLibass"],
             path: "Sources/CAssKit",
             publicHeadersPath: "include",
             cSettings: [
                 .headerSearchPath("libass-headers"),
             ]
         ),
-        .binaryTarget(name: "Libunibreak", path: "Vendor/Libunibreak.xcframework"),
-        .binaryTarget(name: "Libfreetype", path: "Vendor/Libfreetype.xcframework"),
-        .binaryTarget(name: "Libfribidi", path: "Vendor/Libfribidi.xcframework"),
-        .binaryTarget(name: "Libharfbuzz", path: "Vendor/Libharfbuzz.xcframework"),
-        .binaryTarget(name: "Libass", path: "Vendor/Libass.xcframework"),
+        .binaryTarget(name: "AssKitUnibreak", path: "Vendor/AssKitUnibreak.xcframework"),
+        .binaryTarget(name: "AssKitFreetype", path: "Vendor/AssKitFreetype.xcframework"),
+        .binaryTarget(name: "AssKitFribidi", path: "Vendor/AssKitFribidi.xcframework"),
+        .binaryTarget(name: "AssKitHarfbuzz", path: "Vendor/AssKitHarfbuzz.xcframework"),
+        .binaryTarget(name: "AssKitLibass", path: "Vendor/AssKitLibass.xcframework"),
         .testTarget(
             name: "AssKitTests",
             dependencies: ["AssKit"],

@@ -168,12 +168,20 @@ libass is built with CoreText enabled and fontconfig/directwrite disabled, which
 The generated XCFrameworks are written back into:
 
 ```text
-Vendor/Libunibreak.xcframework
-Vendor/Libfreetype.xcframework
-Vendor/Libfribidi.xcframework
-Vendor/Libharfbuzz.xcframework
-Vendor/Libass.xcframework
+Vendor/AssKitUnibreak.xcframework
+Vendor/AssKitFreetype.xcframework
+Vendor/AssKitFribidi.xcframework
+Vendor/AssKitHarfbuzz.xcframework
+Vendor/AssKitLibass.xcframework
 ```
+
+The frameworks ship under an `AssKit` prefix so SwiftPM target names and
+framework bundles stay distinct from other player packages (FFmpegKit and
+forks, KSPlayer, mpv builds, MobileVLCKit) that declare targets like
+`Libass` or `Libfreetype`. Note the prefix only renames modules, bundles and
+install names — the C symbols (`ass_render_frame`, `FT_Init_FreeType`, ...)
+are unchanged. If a host app statically links another libass/freetype copy
+with `-all_load` / `-force_load`, duplicate symbol errors are still possible.
 
 ## Performance Notes
 
